@@ -150,7 +150,7 @@ Yihui Xie: `I have been secretly hacking the Build & Reload button in my RStudio
 
 ## `extremeMetrics` package
 
-Let's practise LP-like package development on [`extremeMetrics` package](https://github.com/mi2-warsaw) which is a set of `Extreme and incredibly crazy set of metrics`.
+Let's practise LP-like package development on [`extremeMetrics` package](https://github.com/mi2-warsaw) which is an `Extreme and incredibly crazy set of metrics`.
 
 1. Using LP-paradigm, write an `LP-*.Rmd` file in `vignettes` directory with an implementation of an incredibly crazy metric function. The more `LaTeX` code, plots and images - the better!
 2. Explain your code in detail. Let everybody know how extraordinary metric you have invented.
