@@ -1,0 +1,156 @@
+---
+title: "R Package Development with Literate Programming paradigm"
+subtitle: "Based on [http://yihui.name/rlp](http://yihui.name/rlp)"
+author: "Marcin Kosiński"
+date: "May 22, 2015"
+output:
+  ioslides_presentation:
+    widescreen: true
+    smaller: true
+    logo: logo.jpg
+    fig_width: 7
+    fig_height: 6
+    fig_caption: true
+    mathjax: local
+    self_contained: false
+    transition: slower
+---
+
+## Why we should create R packages? {.build}
+
+- You have code that you want to share with others
+- Bundling your code into a package makes it easy for other people to use it
+- If R code is in a package, any R user can easily download it, install it, and learn how to use it.
+
+## Why we should create R packages? | Organizing code in a package makes your life easier because packages come with conventions {.build}
+
+> Seriously, it doesn't have to be about sharing your code (although that is an added benefit!). It is about saving yourself time. - [Hilary Parker](http://hilaryparker.com/2014/04/09/writing-an-r-package-from-scratch/)
+
+Conventions are helpful because:
+
+- Instead of having to think about the best way to organize a project, you can just follow a template.
+- If you buy into R's package conventions, you get many tools for free.
+
+# Vignettes: Long-Form Documentation {.build}
+
+## What is a Vignette? {.build}
+
+- A vignette is a long-form guide to your package. 
+- A vignette is like a book chapter or an academic paper: it can describe the problem that your package is designed to solve, and then show the reader how to solve it.
+- Vignettes are also useful if you want to explain the details of your package. For example, if you have implemented a complex statistical algorithm, you might want to describe all the details in a vignette so that users of your package can understand what's going on under the hood, and be confident that you've implemented the algorithm correctly - **and the best way to show it is by using `rlp`!**
+
+> [Hadley Wickham, R packages](http://r-pkgs.had.co.nz/)
+
+
+## Vignette examples {.build}
+
+You can see the vignette for a specific package by using
+```{r, eval = FALSE}
+utils::browseVignettes("dplyr")
+```
+
+
+Sometimes if a package has many vignettes they are connected into a website
+
+[https://github.com/pbiecek/archivist]([https://github.com/pbiecek/archivist])
+
+
+## `knitr` vignettes styles and templates | sky is the limit {.build}
+
+You can see the vignette for a specific package by using
+```{r, eval = FALSE}
+utils::browseVignettes("knitr")
+```
+
+## Advice for Writing Vignettes {.build}
+
+> If you're thinking without writing, you only think you're thinking. - Leslie Lamport.
+
+
+- When writing a vignete, you're teaching someone how to use your package. You need to put yourself in the readers' shoes, and adopt `beginner's mind`.
+- Writing a vignette also makes a nice break from coding. In my experience, writing uses a different part of the brain from programming, so if you're sick of programming, try writing for a bit.
+- A nice vignette can be a sketch of an article for *Journal of Statistical Software* [Hadley Wickham, R packages](http://r-pkgs.had.co.nz/)
+
+
+# Literate Programming {.build}
+
+## What is a Literate Programming paradigm?
+
+- Literate programming is an approach to programming introduced by Donald Knuth in which a program is given as an explanation of the program logic in a natural language, such as English, interspersed with snippets of macros and traditional source code, from which a compilable source code can be generated.
+
+- Interestingly, the most popular application of the LP paradigm seems to be documenting software (using a special form of comments) for users instead of “programming” for authors. In other words, we use LP to document the usage of software, instead of documenting the source code. 
+
+
+-  **In literate programming code is embedded in documentation, with the code following the structure of the documentation.**
+
+## Advantages of LP
+
+LP has at least two advantages: [http://yihui.name/rlp/](http://yihui.name/rlp/)
+
+1. You can write much more extensive and richer documentation than you normally could do with comments. In general, comments in code are (or should be) brief and limited to plain text. Normally you will not write five paragraphs of comments to explain a few lines of code, and you cannot write readable2 math expressions or embed a video in comments.
+1. You can label code chunks and reference/reuse them using the labels, which allows you to compose your program flexibly using different pieces of code chunks. For example, you can define and explain a code chunk later in the document, but insert it in a previous code chunk using its label. This feature has been emphasized by Knuth, but I do not see it is widely adopted for some reason. Perhaps most people are more comfortable with designing a big program by smaller units like functions instead of code chunks, which is actually a good idea
+
+
+
+## An LP-vignette example
+
+http://yihui.name/rlp/
+
+
+# An LP way of creating a package in R with `rlp`
+
+## Necessary packages
+
+```{r, eval = FALSE}
+install.packages(
+  c("roxygen2", "Rd2roxygen", "rlp")
+)
+install.packages(
+  type = "source",
+  repos = c("http://yihui.name/xran", "http://cran.rstudio.com")
+)
+```
+
+
+## Necessary files
+
+`Makefile`
+
+```{r, eval=FALSE}
+purl=Rscript -e "knitr::purl('$(1)', '$(2)', quiet=TRUE, documentation=0)"
+
+rfiles:=$(patsubst vignettes/LP-%.Rmd,R/%-GEN.R,$(wildcard vignettes/LP-*.Rmd))
+
+all: $(rfiles)
+
+R/%-GEN.R: vignettes/LP-%.Rmd
+    $(call purl,$^,$@)
+```
+
+
+## Necessary ninja hacks
+
+Now we have three things to do to fully build this package:
+
+1. Run make to generate R source code to `R/`;
+1. Run `roxygen2` to generate R documentation to `man/`, `NAMESPACE`, and other stuff;
+1. Run `R CMD build` to build the package as well as the vignettes.
+
+
+**Want to do this in 1 click?**
+Yihui Xie: `I have been secretly hacking the Build & Reload button in my RStudio IDE for a long time`. If you open RStudio, and go to `Tools` -> `Project Options` -> `Build Tools`, you will need to specify a weird configuration:
+
+
+```{r, eval=FALSE}
+-v && Rscript -e "Rd2roxygen::rab(install=TRUE, before=system('make'))"
+```
+
+
+# Let's practise!
+
+## `extremeMetrics` package
+
+Let's practise LP-like package development on [`extremeMetrics` package](https://github.com/mi2-warsaw) which is an `Extreme and incredibly crazy set of metrics`.
+
+1. Using LP-paradigm, write an `LP-*.Rmd` file in `vignettes` directory with an implementation of an incredibly crazy metric function. The more `LaTeX` code, plots and images - the better!
+2. Explain your code in detail. Let everybody know how extraordinary metric you have invented.
