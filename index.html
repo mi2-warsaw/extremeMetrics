@@ -234,7 +234,11 @@ R/%-GEN.R: vignettes/LP-%.Rmd
 <li>Run <code>R CMD build</code> to build the package as well as the vignettes.</li>
 </ol>
 
-<p><strong>Want to do this in 1 click?</strong> Yihui Xie: <code>I have been secretly hacking the Build &amp; Reload button in my RStudio IDE for a long time</code>. If you open RStudio, and go to <code>Tools</code> -&gt; <code>Project Options</code> -&gt; <code>Build Tools</code>, you will need to specify a weird configuration:</p>
+<p><strong>Want to do this in 1 click?</strong></p>
+
+<p>Yihui Xie: <code>I have been secretly hacking the Build &amp; Reload button in my RStudio IDE for a long time</code>.</p>
+
+<p>If you open RStudio, and go to <code>Tools</code> -&gt; <code>Project Options</code> -&gt; <code>Build Tools</code>, you will need to specify a weird configuration:</p>
 
 <pre class = 'prettyprint lang-r'>-v &amp;&amp; Rscript -e &quot;Rd2roxygen::rab(install=TRUE, before=system(&#39;make&#39;))&quot;</pre>
 

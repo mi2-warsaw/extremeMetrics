@@ -140,7 +140,10 @@ Now we have three things to do to fully build this package:
 
 
 **Want to do this in 1 click?**
-Yihui Xie: `I have been secretly hacking the Build & Reload button in my RStudio IDE for a long time`. If you open RStudio, and go to `Tools` -> `Project Options` -> `Build Tools`, you will need to specify a weird configuration:
+
+Yihui Xie: `I have been secretly hacking the Build & Reload button in my RStudio IDE for a long time`.
+
+If you open RStudio, and go to `Tools` -> `Project Options` -> `Build Tools`, you will need to specify a weird configuration:
 
 
 ```{r, eval=FALSE}
