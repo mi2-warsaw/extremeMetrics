@@ -205,9 +205,10 @@
 <pre class = 'prettyprint lang-r'>install.packages(
   c(&quot;roxygen2&quot;, &quot;Rd2roxygen&quot;, &quot;rlp&quot;)
 )
-install.packages(
+devtools::install_github(&quot;yihui/rlp&quot;)
+update.packages(
   type = &quot;source&quot;,
-  repos = c(&quot;http://yihui.name/xran&quot;, &quot;http://cran.rstudio.com&quot;)
+  repos = &quot;http://yihui.name/xran&quot;)
 )</pre>
 
 </article></slide><slide class=''><hgroup><h2>Necessary files</h2></hgroup><article  id="necessary-files" class="smaller ">

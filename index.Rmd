@@ -106,9 +106,10 @@ http://yihui.name/rlp/
 install.packages(
   c("roxygen2", "Rd2roxygen", "rlp")
 )
-install.packages(
+devtools::install_github("yihui/rlp")
+update.packages(
   type = "source",
-  repos = c("http://yihui.name/xran", "http://cran.rstudio.com")
+  repos = "http://yihui.name/xran")
 )
 ```
 
