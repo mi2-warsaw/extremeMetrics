@@ -1,0 +1,139 @@
+---
+title: "Cool title"
+author: "Author of the vignette"
+date: "`r Sys.Date()`"
+output:
+  knitr:::html_vignette:
+    number_sections: yes
+vignette: >
+  %\VignetteIndexEntry{Title of the vignette}
+  %\VignetteEngine{knitr::rmarkdown_notangle}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+```{r setup, purl=FALSE}
+knitr::opts_chunk$set(eval = FALSE, tidy = FALSE)
+```
+
+
+Based on [http://yihui.name/rlp/](http://yihui.name/rlp/)
+
+```{r}
+#' A cool function
+#'
+#' Well, not really cool. Just add 1 to x.
+#' @param x a numeric vector
+#' @export
+#' @examples
+#' add_one(1)
+#' add_one(1:10)
+add_one = function(x) {
+  x + 1
+}
+```
+
+
+# A Less Naive Example
+
+Life is certainly not always as simple as `add_one()`. In this section, I give a slightly more advanced example to show how LP can be useful and relevant to developing R packages. Let's consider the maximum likelihood estimation (MLE) for the parameters of the Gamma distribution $\Gamma(y; \alpha, \beta)$.
+
+I will use the function `optim()` to optimize the log-likelihood function. First, I define an R function with arguments `data` and `start`:
+
+```{r}
+#' MLE for the Gamma distribution
+#'
+#' Estimate the parameters (alpha and beta) of the Gamma distribution using
+#' maximum likelihood.
+#' @param data the data vector assumed to be generated from the Gamma
+#'   distribution
+#' @param start the initial values for the parameters of the Gamma distribution
+#'   (passed to \code{\link{optim}()})
+#' @param vcov whether to return an approximate variance-covariance matrix of
+#'   the parameter vector
+#' @return A list with elements \code{estimate} (parameter estimates for alpha
+#'   and beta) and, if \code{vcov = TRUE}, \code{vcov} (the variance-covariance
+#'   matrix of the parameter vector).
+#' @export
+mle_gamma = function(data, start = c(1, 1), vcov = FALSE) {
+```
+
+The Gamma distribution has two commonly used parameterizations (shape-rate or shape-scale), and I will use the following probability density function (shape-rate):
+
+$$f(x|\alpha,\beta)=\frac{\beta^{\alpha}}{\Gamma(\alpha)}x^{\alpha-1}\exp(-\beta x);\quad x>0$$
+
+The log-density function is:
+
+$$\log f=\alpha\log\beta-\log\Gamma(\alpha)+(\alpha-1)\log x-\beta x$$
+
+The log-likelihood function given the data vector $\mathbf{x}=[x_1,x_2,\ldots,x_n]$ will be:
+
+$$L(\alpha,\beta|\mathbf{x})=n(\alpha\log(\beta)-\log(\Gamma(\alpha)))+(\alpha-1)\sum_{i=1}^{n}\log(x_{i})-\beta\sum_{i=1}^{n}x_{i}$$
+
+And I define it in R as `loglike()`, where `param` is the parameter vector $[\alpha, \beta]$, and `x` is the data vector:
+
+```{r}
+  loglike = function(param, x) {
+    a = param[1]  # alpha (the shape parameter)
+    b = param[2]  # beta (the rate parameter)
+    n = length(x)
+    n * (a * log(b) - lgamma(a)) + (a - 1) * sum(log(x)) - b * sum(x)
+  }
+```
+
+It is worth noting that in practice we will rarely translate the math equation to R code like that for the Gamma distribution, since R has the `dgamma()` function that is much more efficient than the raw log-density function I used above. You would use `sum(dgamma(x, shape = param[1], rate = param[2], log = TRUE))` instead. Anyway, I took the silly way just for demonstrating the LP idea instead of how to write efficient statistical computing code.
+
+Next I optimize the log-likelihood function by passing the initial guesses and the data vector to it:
+
+```{r}
+  opt = optim(start, loglike, x = data, hessian = vcov, control = list(fnscale = -1))
+```
+
+You need to be cautious that `optim()` minimizes the objective function by default, and that is why I used `control = list(fnscale = -1)`. Then I'm minimizing `-loglike`, and essentially maximizing `loglike`. I need to make sure the optimization has reached convergence:
+
+```{r}
+  if (opt$convergence != 0) stop('optim() failed to converge')
+  res = list(estimate = opt$par)
+```
+
+Finally, I give an estimate of the variance-covariance matrix $Var([\hat{\alpha},\hat{\beta}]')$ if `vcov = TRUE`:
+
+```{r}
+  if (vcov) res$vcov = solve(-opt$hessian)
+```
+
+The estimate is the inverse of the negative Hessian matrix, because $Var(\hat{\theta})=I^{-1}(\theta)$ for the maximum likelihood estimator $\hat{\theta}$, where $I(\theta)$ is the Information matrix, and we know $I(\theta) = -E(H(\theta))$. In theory, $I(\theta)$ is unknown, and I just use the observed information matrix, i.e., the negative Hessian matrix returned from `optim()`. Note the inverse matrix is computed via `solve()`.
+
+```{r highlight=FALSE}
+  res
+}
+```
+
+The object `res` is returned, and we can use it to compute the confidence intervals of the parameters since MLE is asymptotically Normal. Now let's try the function:
+
+```{r eval=TRUE, purl=FALSE}
+library(extremeMetrics)
+set.seed(1228)
+d = rgamma(100, shape = 5, rate = 2)  # simulate some data from Gamma(5, 2)
+r = mle_gamma(d, vcov = TRUE)
+str(r)
+```
+
+The estimates are not too bad, compared to their true values. I can also give a 95% confidence interval for the parameter $\alpha$, of which the estimate is asymptotically Normal:
+
+```{r eval=TRUE, purl=FALSE}
+a = r$estimate[1]  # estimate of alpha
+s = sqrt(r$vcov[1, 1])  # standard error of the estimate of alpha
+z = qnorm(1 - 0.05/2)  # 97.5% Normal quantile
+c(a - z * s, a + z * s)  # a 95% CI
+```
+
+Below is a histogram of the simulated data, with the true density curve, the true mean (solid vertical line), and the estimated mean^[The mean of the Gamma distribution is $\alpha/\beta$.] (dashed line):
+
+```{r eval=TRUE, purl=FALSE}
+par(mar = c(4, 4, .2, .1))
+hist(d, main = '', col = 'darkgray', border = 'white', freq = FALSE)
+curve(dgamma(x, shape = 5, rate = 2), 0, 6, add = TRUE, lwd = 2)
+abline(v = c(5/2, r$estimate[1]/r$estimate[2]), lty = c(1, 2))
+```
