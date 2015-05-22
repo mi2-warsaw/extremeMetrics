@@ -55,7 +55,7 @@ Sometimes if a package has many vignettes they are connected into a website
 [https://github.com/pbiecek/archivist]([https://github.com/pbiecek/archivist])
 
 
-## `knitr` vignettes styles and templates | sky is the limit {.build}
+## `knitr` styles and templates | sky is the limit {.build}
 
 `knitr` package offers a vide variety of vignettes' templates
 ```{r, eval = FALSE}
@@ -69,7 +69,8 @@ utils::browseVignettes("knitr")
 
 - When writing a vignete, you're teaching someone how to use your package. You need to put yourself in the readers' shoes, and adopt `beginner's mind`.
 - Writing a vignette also makes a nice break from coding. In my experience, writing uses a different part of the brain from programming, so if you're sick of programming, try writing for a bit.
-- A nice vignette can be a sketch of an article for *Journal of Statistical Software* [Hadley Wickham, R packages](http://r-pkgs.had.co.nz/)
+- A nice vignette can be a sketch of an article for *Journal of Statistical Software* 
+- [Hadley Wickham, R packages](http://r-pkgs.had.co.nz/)
 
 
 # Literate Programming {.build}
