@@ -57,7 +57,7 @@ Sometimes if a package has many vignettes they are connected into a website
 
 ## `knitr` vignettes styles and templates | sky is the limit {.build}
 
-You can see the vignette for a specific package by using
+`knitr` package offers a vide variety of vignettes' templates
 ```{r, eval = FALSE}
 utils::browseVignettes("knitr")
 ```
